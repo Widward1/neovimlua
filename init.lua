@@ -44,66 +44,12 @@ require('packer').startup(function()
       'kyazdani/nvim-web-devicons'
     }
   }
-  use {
-    's1n7ax/nvim-terminal',
-    config = function()
-      vim.o.hidden = true
-      require('nvim-terminal').setup()
-    end,
-    }
+  use {"akinsho/toggleterm.nvim", tag = 'v1.*', config = function()
+    require("toggleterm").setup()
+  end}
 end)
 
 vim.o.hidden = true
-
-require('nvim-terminal').setup({
-    window = {
-        -- Do `:h :botright` for more information
-        -- NOTE: width or height may not be applied in some "pos"
-        position = 'botright',
-
-        -- Do `:h split` for more information
-        split = 'sp',
-
-        -- Width of the terminal
-        width = 50,
-
-        -- Height of the terminal
-        height = 15,
-    },
-
-    -- keymap to disable all the default keymaps
-    disable_default_keymaps = false,
-
-    -- keymap to toggle open and close terminal window
-    toggle_keymap = '<leader>;',
-
-    -- increase the window height by when you hit the keymap
-    window_height_change_amount = 2,
-
-    -- increase the window width by when you hit the keymap
-    window_width_change_amount = 2,
-
-    -- keymap to increase the window width
-    increase_width_keymap = '<leader><leader>+',
-
-    -- keymap to decrease the window width
-    decrease_width_keymap = '<leader><leader>-',
-
-    -- keymap to increase the window height
-    increase_height_keymap = '<leader>+',
-
-    -- keymap to decrease the window height
-    decrease_height_keymap = '<leader>-',
-
-    terminals = {
-        -- keymaps to open nth terminal
-        {keymap = '<leader>1'},
-        {keymap = '<leader>2'},
-        {keymap = '<leader>3'},
-        {keymap = '<leader>4'},
-        {keymap = '<leader>5'},
-    },
-})
 
 require'nvim-tree'.setup {
     auto_reload_on_write = true,
@@ -399,13 +345,14 @@ window = {
   -- Setup lspconfig.
   local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
   -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
-  require('lspconfig')['sumneko_lua'].setup {
+  require('lspconfig')['clangd'].setup {
     capabilities = capabilities
   }
 
 local keymap = vim.api.nvim_set_keymap
 keymap('n', '<c-s>', ':w<CR>', {})
 keymap('n', '<leader>n', ':NvimTreeToggle<CR>', {})
+keymap('n', '<leader>t', ':ToggleTerm size=20<CR>', {})
 local opts = { noremap = true }
 
 local function nkeymap(key, map)
@@ -423,4 +370,17 @@ nkeymap('K', ':lua vim.lsp.buf.hover()<cr>')
 nkeymap('<c-k>', ':lua vim.lsp.buf.signature_help()<cr>')
 nkeymap('<leader>af', ':lua vim.lsp.buf.code_action()<cr>')
 nkeymap('<leader>rn', ':lua vim.lsp.buf.rename()<cr>')
+
+function _G.set_terminal_keymaps()
+  local opts = {noremap = true}
+  vim.api.nvim_buf_set_keymap(0, 't', '<esc>', [[<C-\><C-n>]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', 'jk', [[<C-\><C-n>]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-h>', [[<C-\><C-n><C-W>h]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-j>', [[<C-\><C-n><C-W>j]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-k>', [[<C-\><C-n><C-W>k]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
+end
+
+-- if you only want these mappings for toggle term use term://*toggleterm#* instead
+vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 
